@@ -1,0 +1,40 @@
+    {
+      "namespace": "com.rogers.goldengate.avro",
+      "type": "record",
+      "avro.java.string": "String",
+      "name": "InsertMutation",
+      "fields": [
+    	    {
+    			"name": "schema",
+    			"type": "string"
+    		},
+    		{
+    			"name": "table",
+    			"type": "string"
+    		},
+    	/*	{
+    			"name": "tableId",
+    			"type": "long"
+    		},
+    		{
+    		    "name": "txid",
+    		    "type": ["null", "com.rogers.goldengate.avro.Guid"],
+    		    "default": "null"
+    		},*/
+    		/*{
+    			"name": "integers",
+    			"type": {"type": "map", "values": "int"}
+    		},*/
+    		{
+    			"name": "strings",
+    			"avro.java.string": "String",
+    			"type": {"type": "map", "avro.java.string": "String", "values": {"type": "string", "avro.java.string": "String"}}
+    		}/*,
+    		{
+    			"name": "longs",
+    			"type": {"type": "map", "values": "long"}
+    		}*/
+    	]
+    }
+
+    

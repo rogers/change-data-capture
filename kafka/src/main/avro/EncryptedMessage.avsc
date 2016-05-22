@@ -1,0 +1,20 @@
+{"namespace": "crypto.avro",
+ "type": "record",
+ "name": "AvroEncryptedMessage",
+ "fields": [
+     {"name": "encryptedMessage", "type": "bytes"},
+     {"name": "keys", 
+      "type": {"type": "array", "items": { 
+         "name": "AvroKeyVersion", 
+         "type": "record", 
+         "fields": [ 
+           {"name": "encryptedKey", "type": "bytes"},
+           {"name": "encryptedIV", "type": "bytes"},
+           {"name": "versionName",  "type": "string"}
+         ] 
+        }
+      }
+    }
+  ]
+}
+
