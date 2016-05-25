@@ -2,13 +2,7 @@ package com.rogers.kafka.serializers;
 
 import java.util.Map;
 
-import org.apache.kafka.common.config.ConfigException;
-
-import java.util.Properties;
-
 import com.rogers.kafka.crypto.key.*;
-//import com.goldengate.delivery.handler.kafka.util.key.KeyProviderFactory;
-//import com.goldengate.delivery.handler.kafka.util.key.TestKeyProvider;
 
 public class AbstractKafkaSecureByteArraySeDe {
 		protected KeyProvider keyProvider;

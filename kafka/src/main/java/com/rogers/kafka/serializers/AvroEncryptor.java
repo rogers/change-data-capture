@@ -1,10 +1,5 @@
 package com.rogers.kafka.serializers;
 
-
-
-
-//import  com.goldengate.delivery.handler.kafka.KafkaHandler;
-//import  com.goldengate.delivery.handler.kafka.util.EncryptedMessage;
 import  com.rogers.kafka.crypto.key.*;
 import  com.rogers.kafka.crypto.key.KeyProvider.KeyVersion;
 
@@ -12,8 +7,6 @@ import  com.rogers.kafka.crypto.key.KeyProvider.KeyVersion;
 import crypto.avro.AvroEncryptedMessage;
 import crypto.avro.AvroKeyVersion;
 
-import org.apache.avro.file.DataFileReader;
-import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.io.DatumReader;
 import org.apache.avro.io.DatumWriter;
 import org.apache.avro.specific.SpecificDatumReader;
@@ -25,14 +18,9 @@ import org.apache.avro.io.BinaryEncoder;
 import java.io.IOException;
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
-import java.nio.file.*;
 import java.security.*;
-import java.security.spec.*;
 import java.util.List;
 import java.util.ArrayList;
-
-import javax.crypto.*;
-import javax.crypto.spec.*;
 
 import java.util.Random;
 
@@ -61,7 +49,6 @@ public class AvroEncryptor extends Encryptor {
 	         writer = new SpecificDatumWriter<AvroEncryptedMessage>(AvroEncryptedMessage.class);
 	         reader = new SpecificDatumReader<AvroEncryptedMessage>(AvroEncryptedMessage.class);
 		  } catch (RuntimeException e) {
-  		      // avro deserialization may throw AvroRuntimeException, NullPointerException, etc
   		      throw new SerializationException("Failed to create Avro reader and writer  ", e);
   		}
 
@@ -81,29 +68,24 @@ public class AvroEncryptor extends Encryptor {
         	 KeyVersion currentKey = provider.getCurrentPublicKey(public_key);
         	 String keyVersionName = currentKey.getVersionName();
              PublicKey publicKey = AsymmetricKeyReader.readPublicKey(currentKey.getMaterial());
+
             // Encrypt the symmetric key with the public key.
             AsymmetricEncryptor asymmetricEncriptor = new AsymmetricEncryptor(publicKey);
             byte[] secretKeyBytes = symmetricEncryptor.getKey().getEncoded();
             byte[] encryptedSecretKey = asymmetricEncriptor.encrypt(secretKeyBytes);
 
-            logger.debug("\nRun  = " + new Random().nextInt(100));
-            logger.debug("\nKey = " + Hex.encodeHexString(secretKeyBytes));
-            logger.debug("\nencrypted Secret Key = " + Hex.encodeHexString(encryptedSecretKey));
-            System.out.print("\n Enc Key name = " + keyVersionName + "\n");
+            logger.debug("Key = {}", Hex.encodeHexString(secretKeyBytes));
+            logger.debug("encrypted Secret Key {}", Hex.encodeHexString(encryptedSecretKey));
 
             // Encrypt the symmetric key initialization vector with the public key.
             byte[] ivBytes = symmetricEncryptor.getInitializationVector().getIV();
             byte[] encryptedIV = asymmetricEncriptor.encrypt(ivBytes);
-            logger.debug("IV = " + Hex.encodeHexString(ivBytes));
+            logger.debug("IV = {}",  Hex.encodeHexString(ivBytes));
             keys.add(new AvroKeyVersion(ByteBuffer.wrap(encryptedSecretKey), ByteBuffer.wrap(encryptedIV), keyVersionName));
-         
-            /*msg.setEncryptedSecretKey(ByteBuffer.wrap(encryptedSecretKey));
-            msg.setEncryptedIV(ByteBuffer.wrap(encryptedIV));*/
-            
+
           }
           msg.setKeys(keys);
           return  serialize(msg);
-        //  return new EncryptedMessage(encryptedMessage, encryptedSecretKey, encryptedIV);
 
 	  }
 	  @Override
@@ -111,41 +93,9 @@ public class AvroEncryptor extends Encryptor {
 		  AvroEncryptedMessage msg = deserialize(payload);
 		  AvroKeyVersion key = findKeyVersion(msg.getKeys());
    	      return decryptImp(msg.encryptedMessage.array(), key.getEncryptedKey().array(),  key.encryptedIV.array(), key.getVersionName().toString());
-
-    	// Read private key from file.
-    	  /*
-         // PrivateKey privateKey = AsymmetricKeyReader.readPrivateKey(PRIVATE_KEY_FILENAME);
-          PrivateKey privateKey = AsymmetricKeyReader.readPrivateKey(provider.getCurrentKey("private").getMaterial());
-          //PrivateKey privateKey = AsymmetricKeyReader.readPrivateKey(Hex.decodeHex(PRIVATE_KEY_HEX_STRING.toCharArray()));
-    	  AsymmetricDecryptor asymmetricDecryptor = new AsymmetricDecryptor(privateKey);
-    	  byte[] receivedSecretKeyBytes ="d".getBytes();
-    	  try {
-               receivedSecretKeyBytes = asymmetricDecryptor.decrypt(msg.encryptedMessage.array());
-          } catch (Exception e1) {		
-   	        System.out.println("Error decrypting expecption:" + e1);
-		  }
-    	  logger.info("receivedSecretKeyBytes:" + Hex.encodeHexString(msg.encryptedSecretKey.array() ));
-    	  logger.info("Decrypted SecretKey:" + Hex.encodeHexString(receivedSecretKeyBytes));
-		  
-          SecretKey receivedSecretKey = new SecretKeySpec(receivedSecretKeyBytes, SECRET_KEY_ALGORITHM);
-         // assert receivedSecretKey.getEncoded().length == SECRET_KEY_LENGTH_BITS: "Secret key is " + receivedSecretKey.getEncoded().length + " long, expecting " + SECRET_KEY_LENGTH_BITS;
-          // Decrypt the symmetric key initialization vector with the private key.
-          byte[] receivedIVBytes = asymmetricDecryptor.decrypt(msg.encryptedIV.array());
-          IvParameterSpec receivedIV = new IvParameterSpec(receivedIVBytes);
-
-          // Decrypt the message.
-          SymmetricDecryptor symmetricDecryptor = new SymmetricDecryptor(receivedSecretKey, receivedIV);
-          byte[] receivedMessageBytes = symmetricDecryptor.decrypt(msg.encryptedMessage.array() );
-
-          // The message that was received.
-         // System.out.printf("output message: %s\n", receivedMessage);
-          return receivedMessageBytes; */
-    	  
       }
       private AvroKeyVersion findKeyVersion(List<AvroKeyVersion> keys) throws IOException{
-    	//  KeyVersion foundKey = null; 
     	  for(AvroKeyVersion key: keys){
-    		  //System.out.print("\nKey name = " + key.getVersionName()  + "\n");
     		  if(provider.getKeyVersion(key.getVersionName().toString()) != null){
     			  
     			  return key; 
@@ -164,7 +114,6 @@ public class AvroEncryptor extends Encryptor {
       private AvroEncryptedMessage deserialize(byte[] payload){
     	  int id = -1;
   		try {
-  		//   DatumReader<AvroEncryptedMessage> reader = new SpecificDatumReader<AvroEncryptedMessage>(AvroEncryptedMessage.class);
   			ByteBuffer buffer = getByteBuffer(payload);
   			id = buffer.getInt();
   			// TODO: Right now we have only one schema... add suport for picking the right scema based on the ID
@@ -179,19 +128,14 @@ public class AvroEncryptor extends Encryptor {
   		} catch (IOException e) {
   		      throw new SerializationException("Error deserializing Avro SecureMessage  ", e);
   		} catch (RuntimeException e) {
-  		      // avro deserialization may throw AvroRuntimeException, NullPointerException, etc
   		      throw new SerializationException("Error deserializing Avro SecureMessage  ", e);
   		}
   		
   	}
       private byte[] serialize(AvroEncryptedMessage msg){
-  		//DatumWriter<AvroEncryptedMessage> writer = new SpecificDatumWriter<AvroEncryptedMessage>(AvroEncryptedMessage.class);
     	  try {
     	     ByteArrayOutputStream out = new ByteArrayOutputStream();
     	     BinaryEncoder encoder = encoderFactory.directBinaryEncoder(out, null);
-    	    // AvroEncryptedMessage msg =  new AvroEncryptedMessage( ByteBuffer.wrap(encryptedMessage),  ByteBuffer.wrap(encryptedSecretKey), ByteBuffer.wrap(encryptedIV));
-    	    // logger.info("sent SecretKeyBytes:" + Hex.encodeHexString(encryptedSecretKey ));
-    	     //logger.info("set SecretKeyBytes:" + Hex.encodeHexString(msg.encryptedSecretKey.array() ));
     	     out.write(MAGIC_BYTE);
     	     out.write(ByteBuffer.allocate(idSize).putInt(SCHEME_ID).array());
     	     writer.write(msg, encoder);

@@ -1,9 +1,5 @@
 package com.rogers.kafka.serializers;
 
-import java.util.Map;
-
-import org.apache.kafka.common.config.ConfigException;
-
 import com.rogers.kafka.crypto.key.*;
 
 public class EncryptorFactory {
