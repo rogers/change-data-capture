@@ -7,15 +7,16 @@ import org.apache.kafka.common.serialization.Serializer;
 import java.io.IOException;
 import java.util.Map;
 
-public class KafkaSecureByteArraySerializer extends AbstractKafkaSecureByteArraySeDe implements Serializer<byte[]> {
+public class KafkaSecureByteArraySerializer extends AbstractKafkaSecureByteArraySerDe implements Serializer<byte[]> {
 
     private static final String KEYS_CONFIG = "crypto.producer.keys";
     private String[] public_keys;
 
+
     @Override
     public void configure(Map<String, ?> configs, boolean isKey) {
-        setKeyProvider(configs);
-        setEncryptor(configs);
+        AbstractKafkaSecureByteArraySerDeConfig config = new AbstractKafkaSecureByteArraySerDeConfig(configs);
+        configure(config);
         try {
             public_keys = keyProvider.getAllPublicKeys();
         } catch (IOException e) {

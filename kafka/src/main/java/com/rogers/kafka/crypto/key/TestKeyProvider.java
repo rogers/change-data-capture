@@ -15,10 +15,11 @@ import java.util.List;
  * @author eugene.miretsky
  */
 public class TestKeyProvider extends KeyProvider {
-    private static final String PUBLIC_KEY_FILENAME = "public_key.der";
-    private static final String PRIVATE_KEY_FILENAME = "private_key.der";
-    private static final String PUBLIC_KEY_FILENAME2 = "public_key2.der";
-    private static final String PRIVATE_KEY_FILENAME2 = "private_key2.der";
+    private static final String KEY_DIR = "src/test/resources/keys/";
+    private static final String PUBLIC_KEY_FILENAME = KEY_DIR + "public_key.der";
+    private static final String PRIVATE_KEY_FILENAME = KEY_DIR + "private_key.der";
+    private static final String PUBLIC_KEY_FILENAME2 = KEY_DIR + "public_key2.der";
+    private static final String PRIVATE_KEY_FILENAME2 = KEY_DIR + "private_key2.der";
     public static String KEY_NAME = "key";
     public static String KEY_NAME2 = "key2";
     private byte[] current_public_key;

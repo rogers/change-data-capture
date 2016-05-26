@@ -4,14 +4,14 @@ import kafka.serializer.Decoder;
 import kafka.utils.VerifiableProperties;
 import org.apache.kafka.common.errors.SerializationException;
 
-public class KafkaSecureByteArrayDecoder extends AbstractKafkaSecureByteArraySeDe implements Decoder<byte[]> {
+public class KafkaSecureByteArrayDecoder extends AbstractKafkaSecureByteArraySerDe implements Decoder<byte[]> {
 
     /**
      * Constructor used by Kafka consumer.
      */
     public KafkaSecureByteArrayDecoder(VerifiableProperties props) {
-        setKeyProvider(props.props());
-        setEncryptor(props.props());
+        AbstractKafkaSecureByteArraySerDeConfig config = new AbstractKafkaSecureByteArraySerDeConfig(props.props());
+        configure(config);
     }
 
     @Override

@@ -33,8 +33,7 @@ public class KafkaSecureSerializerTest {
 
 
   private  String topic = "testTopic2";
-  //TODO: fix tests... failing with mvn. Probably some path issue
-//  @Test
+  //@Test
   public void testSecureSerializer() {
       String test = "Test String";
       
@@ -53,6 +52,7 @@ public class KafkaSecureSerializerTest {
     /*  assertEquals("Should support null in serialization and deserialization",
               null, deserializer.deserialize(topic, serializer.serialize(topic, null)));*/
   }
+    @Test
   public void testAvroSecureSerializer() {
       String test = "Test String";
       
@@ -61,9 +61,9 @@ public class KafkaSecureSerializerTest {
       Map<String, Object> deserializerConfigs = new HashMap<String, Object>();
      
       serializer = new KafkaSecureByteArraySerializer();
-      serializerConfigs.put(Encryptor.ENCRYPTOR_CONFIG , "avro");
+      serializerConfigs.put(AbstractKafkaSecureByteArraySerDeConfig.ENCRYPTOR_CONFIG , "avro");
       serializer.configure(serializerConfigs, false);
-      deserializerConfigs.put(Encryptor.ENCRYPTOR_CONFIG , "avro");
+      deserializerConfigs.put(AbstractKafkaSecureByteArraySerDeConfig.ENCRYPTOR_CONFIG , "avro");
       deserializer = new KafkaSecureByteArrayDeserializer();
       deserializer.configure(deserializerConfigs, false);
       
@@ -73,10 +73,10 @@ public class KafkaSecureSerializerTest {
     /*  assertEquals("Should support null in serialization and deserialization",
               null, deserializer.deserialize(topic, serializer.serialize(topic, null)));*/
   }
- // @Test
+  @Test
   public void wrongConfig() { 
 	  Map<String, Object> serializerConfigs = new HashMap<String, Object>();
-	  serializerConfigs.put(KeyProvider.PROVIDER_CONFIG , "random");
+	  serializerConfigs.put(AbstractKafkaSecureByteArraySerDeConfig.KEY_PROVIDER_CONFIG , "random");
 	  try{
 	     serializer.configure(serializerConfigs, false);
 	     fail("Didn't throw an exception for wrong key provider");
@@ -86,7 +86,7 @@ public class KafkaSecureSerializerTest {
 	     // fail("Threw the incorrect exception when wrong key provider was provided");
 	  } 
 	  serializerConfigs.clear();
-	  serializerConfigs.put(KeyProvider.PROVIDER_CONFIG , "config");
+	  serializerConfigs.put(AbstractKafkaSecureByteArraySerDeConfig.KEY_PROVIDER_CONFIG , "config");
 	  try{
 	     serializer.configure(serializerConfigs, false);
 	     fail("Didn't throw an exception when didn't provide configs for ConfigKeyProvider");
